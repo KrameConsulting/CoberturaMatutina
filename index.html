@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis de Narrativas: Las Mañaneras</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #ffffff; /* Fondo totalmente blanco */
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --morena-guinda: #691c32; /* Guinda Institucional */
+      --morena-guinda-light: #fcf4f6;
+      --morena-gold: #b38e5d; /* Dorado complementario */
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --font-family: 'Plus Jakarta Sans', sans-serif;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      font-weight: 400;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 2.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1.6;
+    }
+
+    .main-header {
+      text-align: center;
+      max-width: 900px;
+      margin-bottom: 2.5rem;
+    }
+
+    .main-header h1 {
+      font-weight: 700;
+      font-size: 2.25rem;
+      color: var(--morena-guinda);
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.025em;
+    }
+
+    .main-header p.subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin: 0 0 0.4rem 0;
+    }
+
+    .main-header p.sub-subtitle {
+      color: var(--morena-gold);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    /* Navegador de Línea de Tiempo */
+    .timeline-wrapper {
+      width: 100%;
+      max-width: 1000px;
+      position: relative;
+      margin-bottom: 2.5rem;
+      padding: 0.5rem 0;
+    }
+
+    .timeline-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      position: relative;
+    }
+
+    .timeline-line {
+      position: absolute;
+      top: 13px;
+      left: 1.5rem;
+      right: 1.5rem;
+      height: 3px;
+      background: var(--border-color);
+      z-index: 1;
+    }
+
+    .node-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .node {
+      background: #ffffff;
+      border: 3px solid #94a3b8;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .node-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: color 0.2s ease;
+    }
+
+    .node-wrapper:hover .node {
+      border-color: var(--morena-guinda);
+      transform: scale(1.1);
+    }
+
+    .node-wrapper.active .node {
+      background: var(--morena-guinda);
+      border-color: var(--morena-guinda);
+      transform: scale(1.25);
+      box-shadow: 0 0 0 4px var(--morena-guinda-light);
+    }
+
+    .node-wrapper.active .node-label {
+      color: var(--morena-guinda);
+      font-weight: 700;
+    }
+
+    /* Contenedor de Tabla / Tarjeta */
+    .content-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      box-shadow: var(--shadow-md);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .content-card.fade-out {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .card-title {
+      font-weight: 700;
+      margin: 0 0 1.5rem 0;
+      font-size: 1.5rem;
+      color: var(--morena-guinda);
+      border-bottom: 2px solid var(--morena-guinda-light);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Tabla de Narrativas */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .narrative-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    .narrative-table th {
+      background-color: var(--morena-guinda);
+      color: #ffffff;
+      font-weight: 600;
+      padding: 1rem;
+      border: 1px solid var(--morena-guinda);
+    }
+
+    .narrative-table td {
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      vertical-align: top;
+    }
+
+    .narrative-table tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    .narrative-title {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .percentage-badge {
+      display: inline-block;
+      background: var(--morena-guinda-light);
+      color: var(--morena-guinda);
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid rgba(105, 28, 50, 0.15);
+      text-align: center;
+    }
+
+    .narrative-table ul {
+      margin: 0;
+      padding-left: 1.2rem;
+    }
+
+    .narrative-table li {
+      margin-bottom: 0.5rem;
+    }
+
+    .narrative-table li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      body {
+        padding: 1.5rem 0.75rem;
+      }
+
+      .timeline-wrapper {
+        overflow-x: auto;
+        padding-bottom: 1rem;
+      }
+
+      .timeline-container {
+        min-width: 650px;
+        padding: 0 1rem;
+      }
+
+      .content-card {
+        padding: 1.25rem;
+      }
+
+      .narrative-table th, 
+      .narrative-table td {
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="main-header">
+    <h1>Cobertura Mediática de Las Mañaneras</h1>
+    <p class="subtitle">Narrativas más repetidas, porcentajes y encuadre (2019 -2026)</p>
+    <p class="sub-subtitle">1,872 conferencias matutinas analizadas en su versión estenográfica</p>
+  </header>
+
+  <nav class="timeline-wrapper" aria-label="Línea de tiempo por año">
+    <div class="timeline-container">
+      <div class="timeline-line"></div>
+      
+      <button class="node-wrapper active" onclick="selectYear(2019, this)">
+        <span class="node"></span>
+        <span class="node-label">2019</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2020, this)">
+        <span class="node"></span>
+        <span class="node-label">2020</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2021, this)">
+        <span class="node"></span>
+        <span class="node-label">2021</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2022, this)">
+        <span class="node"></span>
+        <span class="node-label">2022</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2023, this)">
+        <span class="node"></span>
+        <span class="node-label">2023</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2024, this)">
+        <span class="node"></span>
+        <span class="node-label">2024</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2025, this)">
+        <span class="node"></span>
+        <span class="node-label">2025</span>
+      </button>
+      <button class="node-wrapper" onclick="selectYear(2026, this)">
+        <span class="node"></span>
+        <span class="node-label">2026</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="content-card" id="card-display" aria-live="polite"></main>
+
+  <script>
+    const data = {
+      2019: {
+        type: 'detailed',
+        headers: [
+          { name: "Narrativa Identificada", width: "22%" },
+          { name: "Porcentaje", width: "12%" },
+          { name: "Resumen de la Narrativa", width: "33%" },
+          { name: "Estrategia de Comunicación y Encuadres (Framing)", width: "33%" }
+        ],
+        rows: [
+          {
+            narrativa: "Transformación, Austeridad y Cierre al Pasado Neoliberal",
+            porcentaje: "~45%",
+            mensajes: [
+              "El modelo neoliberal se basó en el saqueo, la corrupción y el privilegio de las élites.",
+              "La austeridad republicana asegura recursos para programas sociales sin endeudar al país.",
+              "Los funcionarios deben hacer pública su declaración patrimonial por ética profesional.",
+              "Existe una política de 'punto final', reconciliación y 'amor y paz' frente a adversarios políticos o grupos rebeldes."
+            ],
+            estrategia: [
+              "<strong>Encuadre de Apertura Democrática:</strong> Uso del derecho de réplica para cuestionar a la 'prensa fifí' y medios opositores.",
+              "<strong>Encuadre Moral:</strong> Presenta la austeridad y la honestidad como remedios definitivos para la desigualdad histórica.",
+              "<strong>Optimismo Económico:</strong> Resalta la estabilidad de la moneda y el empleo pese a las críticas externas."
+            ]
+          },
+          {
+            narrativa: "Seguridad Pública, Moralización y Guardia Nacional",
+            porcentaje: "~35%",
+            mensajes: [
+              "Las Fuerzas Armadas son 'pueblo uniformado', disciplinado y respetuoso de los derechos humanos.",
+              "La Guardia Nacional es indispensable para desplegar presencia territorial y recuperar la paz.",
+              "Se atienden las causas estructurales (pobreza y falta de oportunidades para jóvenes) y no solo los efectos.",
+              "La violencia no va al alza de forma descontrolada como señalan reportes extemporáneos."
+            ],
+            estrategia: [
+              "<strong>Encuadre de Legitimación Institucional:</strong> Reivindicación de la lealtad militar frente al estigma de represión del pasado.",
+              "<strong>Encuadre de Reclutamiento Moral:</strong> Convocatoria a jóvenes a sumarse a la corporación bajo un deber patrio.",
+              "<strong>Contranarrativa Estadística:</strong> Aclaración constante de cifras delictivas frente a las coberturas mediáticas."
+            ]
+          },
+          {
+            narrativa: "Combate al Huachicoleo y Control Logístico de Pemex",
+            porcentaje: "~20%",
+            mensajes: [
+              "El robo de combustible ('huachicoleo') estuvo solapado durante años desde el interior de Pemex.",
+              "Las fallas puntuales en el abasto son transitorias, generadas por el cambio de distribución de ductos a pipas bajo resguardo militar.",
+              "Se pide la colaboración y paciencia de la ciudadanía para romper la cadena del delito."
+            ],
+            estrategia: [
+              "<strong>Encuadre de Resiliencia Ciudadana:</strong> Llamado a 'portarse bien' y no comprar gasolina robada para apoyar al gobierno.",
+              "<strong>Encuadre de Soberanía:</strong> Rescate institucional del patrimonio petrolero frente a redes de complicidad y sabotaje.",
+              "<strong>Gestión de Crisis:</strong> Justificación del desabasto local como un costo temporal necesario para erradicar el saqueo."
+            ]
+          }
+        ]
+      },
+      2020: {
+        type: 'simple',
+        headers: [
+          { name: "Narrativa Identificada", width: "25%" },
+          { name: "Porcentaje", width: "15%" },
+          { name: "Resumen de la Narrativa", width: "60%" }
+        ],
+        rows: [
+          {
+            narrativa: "1. Pandemia y Salud (COVID-19)",
+            porcentaje: "~43.1%",
+            explicacion: "Es la narrativa dominante. Incluye explicaciones detalladas sobre curvas epidémicas, casos estimados vs. confirmados, defunciones, ocupación hospitalaria, el 'semáforo' epidemiológico y modelos matemáticos (CIMAT, UNAM). Se enfatiza la transparencia de los datos presentados por Hugo López-Gatell, la reducción de la mortalidad y la defensa de la estrategia sanitaria frente a críticas."
+          },
+          {
+            narrativa: "2. Seguridad y Delincuencia",
+            porcentaje: "~21.1%",
+            explicacion: "Segunda narrativa más frecuente. Se centra en la presentación de estadísticas delictivas (homicidio doloso, feminicidios, robo de vehículos, secuestro, extorsión). Se destaca recurrentemente la 'tendencia a la baja' en la mayoría de los delitos, la confiabilidad de los datos del INEGI (al no tener 'cifra negra' en homicidios y robo de vehículos) y la coordinación con fiscalías y fuerzas armadas (SEDENA, Marina, Guardia Nacional)."
+          },
+          {
+            narrativa: "3. Infraestructura y Proyectos Estratégicos",
+            porcentaje: "~12.6%",
+            explicacion: "Menciones a proyectos emblemáticos de la administración, como el avance del Tren Maya (ej. tramo Palenque-Escárcega), la colaboración con PEMEX y empresas privadas (como Talos) para la exploración de hidrocarburos, y el reacondicionamiento de hospitales por parte de ingenieros militares a través del INSABI."
+          },
+          {
+            narrativa: "4. Crítica a Medios y Desinformación",
+            porcentaje: "~9.3%",
+            explicacion: "El texto contiene múltiples referencias a la crítica hacia medios de comunicación tradicionales, periodistas, 'moneros' y caricaturistas. Se mencionan análisis internos de notas periodísticas (clasificadas en positivas, neutrales y negativas), acusaciones de 'amarillismo', y referencias específicas a revistas como Nexos o Letras Libres (Enrique Krauze), defendiendo la 'Transformación' frente a lo que se considera una campaña de desprestigio."
+          },
+          {
+            narrativa: "5. Bienestar Social y Educación",
+            porcentaje: "~7.1%",
+            explicacion: "Aborda temas como las pensiones para trabajadores y jubilados, la distribución de recursos del bienestar, y la estrategia educativa durante la pandemia (programas en Canal 11, TV Educativa, TV UNAM). Se hace énfasis en el concepto de la 'carpeta de experiencias' como herramienta pedagógica y de desarrollo personal durante el confinamiento."
+          },
+          {
+            narrativa: "6. Combate a la Corrupción y Ahorro",
+            porcentaje: "~4.1%",
+            explicacion: "Se resaltan los ahorros obtenidos por la administración (ej. renegociación de contratos del Centro de Datos), el combate a las 'factureras', y críticas a la gestión anterior de recursos como las AFORES y el INFONAVIT, enmarcándolo todo bajo la política de 'austeridad republicana' y el fin de los 'privilegios'."
+          },
+          {
+            narrativa: "7. Otros / Temas Transversales",
+            porcentaje: "~2.7%",
+            explicacion: "Temas menores o puntuales que aparecen en el texto, como la protección y repatriación de mexicanos en el exterior, censos a damnificados por desastres naturales, y menciones a consultas ciudadanas."
+          }
+        ]
+      },
+      2021: {
+        type: 'deep',
+        headers: [
+          { name: "Narrativa Identificada", width: "22%" },
+          { name: "Porcentaje", width: "10%" },
+          { name: "Resumen de la Narrativa", width: "43%" },
+          { name: "Elementos Clave / Palabras Recurrentes", width: "25%" }
+        ],
+        rows: [
+          {
+            narrativa: "1. Seguridad, Justicia y Estrategia Territorial",
+            porcentaje: "~30%",
+            resumen: "El gobierno asume la crisis de seguridad como un legado de administraciones pasadas ('se dejó arraigar mucho todo lo relacionado con la delincuencia'). La narrativa se centra en la coordinación institucional (Gabinete de Seguridad, Sedena, Semar, Guardia Nacional) y la territorialización de la paz a través de las 32 mesas estatales y 266 regionales. Se reconoce la gravedad de delitos como el feminicidio, la extorsión y el secuestro, pero se enfatiza que la estrategia no es de 'guerra' sino de atención a las causas sociales, inteligencia financiera (INDEP) y presencia permanente, evitando el traslado de delincuentes de una región a otra.",
+            elementos: "Mesas de construcción de paz, Guardia Nacional, INDEP, feminicidio, extorsión, inteligencia, causas sociales, coordinación federal-estatal."
+          },
+          {
+            narrativa: "2. Política Social, Censos y Austeridad Republicana",
+            porcentaje: "~20%",
+            resumen: "Se construye la narrativa del Estado protector y directo. El gobierno se distancia de la burocracia corrupta del pasado ('infinitud de intermediarios que medraban'). La entrega de apoyos (ej. tras inundaciones en Tabasco y Chiapas) se realiza mediante 'censos casa por casa', garantizando que el 100% del recurso llegue al afectado. Se entrelaza con la narrativa de la austeridad y el combate a la corrupción en contratos de salud y la cancelación de concesiones mineras que no pagaban impuestos, devolviendo la rectoría del Estado al 'pueblo'.",
+            elementos: "Censo casa por casa, entrega directa, sin intermediarios, austeridad, renegociación de contratos, corrupción del pasado, creer en el pueblo."
+          },
+          {
+            narrativa: "3. Crítica a los Medios y Guerra Mediática",
+            porcentaje: "~15%",
+            resumen: "El gobierno se posiciona como víctima de una campaña de desinformación orquestada por conservadores, empresarios afectados (ej. reforma eléctrica) y medios tradicionales. Se utiliza la herramienta del 'Quién es quién en las mentiras' para desmentir notas alarmistas. Se acusa a los medios de omitir información, usar sensacionalismo ('notasuleras') y fabricar crisis. La narrativa busca empoderar al ciudadano para consumir información alternativa y validar las redes sociales y la comunicación directa del presidente como fuentes verdaderas.",
+            elementos: "Fake news, conservadores, campaña de miedo, reforma eléctrica, FEMSA/Coca-Cola, sesgo informativo, calumnia, quién es quién en las mentiras."
+          },
+          {
+            narrativa: "4. Salud Pública y Manejo de la Pandemia",
+            porcentaje: "~15%",
+            resumen: "Se presenta una narrativa de transparencia científica y capacidad institucional. A través de los reportes técnicos (Hugo López-Gatell), se muestra el control de la curva epidemiológica, la saturación hospitalaria y el éxito de la vacunación. Se destaca la investigación médica nacional (especialistas mexicanos, Avimex) y el monitoreo telefónico de pacientes en casa, contrastando la preparación del sistema de salud público con la negligencia de gobiernos anteriores.",
+            elementos: "Curva epidemiémica, hospitalización, vacunación, monitoreo telefónico, Avimex, especialistas, casos estimados, letalidad."
+          },
+          {
+            narrativa: "5. Derechos Humanos, Búsqueda y Víctimas",
+            porcentaje: "~10%",
+            resumen: "Hay un reconocimiento explícito de la tragedia humanitaria (desaparecidos y feminicidios). La narrativa valida y abraza a los colectivos de madres buscadoras, reconociendo que 'sustituyen a las fiscalías'. Se enfatiza la creación de protocolos con perspectiva de género, la unidad de contexto para los feminicidios, el fortalecimiento de los servicios forenses y la Comisión Nacional de Búsqueda. Se busca pasar de la impunidad histórica a la 'sensibilidad' y el acompañamiento estatal a las víctimas.",
+            elementos: "Colectivos buscadores, fosas clandestinas, CONABIM, perspectiva de género, unidades de contexto, impunidad, tejido social."
+          },
+          {
+            narrativa: "6. Infraestructura, Economía y Obras Emblemáticas",
+            porcentaje: "~10%",
+            resumen: "Se legitiman las grandes obras como motores de justicia social y rescate histórico. El Tren Maya no es solo un proyecto turístico, sino una obra de 'investigación regional' y rescate arqueológico (uso de LIDAR, INAH). Se aborda la transparencia en dictámenes técnicos (ej. Línea 12 del Metro CDMX) y la equidad en la distribución de recursos federales (Fondo General de Participaciones) basándose en datos duros del INEGI (población, recaudación), promoviendo la responsabilidad fiscal de los estados.",
+            elementos: "Tren Maya, rescate arqueológico, LIDAR, INEGI, participaciones federales, Línea 12, reconstrucción de patrimonio, austeridad."
+          }
+        ]
+      },
+      2022: {
+        type: 'summary',
+        headers: [
+          { name: "Narrativa Identificada", width: "25%" },
+          { name: "Porcentaje", width: "12%" },
+          { name: "Resumen de la Narrativa", width: "63%" }
+        ],
+        rows: [
+          {
+            narrativa: "1. Seguridad, Justicia y la \"Nueva Verdad\"",
+            porcentaje: "~30%",
+            resumen: "El Estado recupera el control mediante inteligencia y coordinación, no solo fuerza. Admite la herencia de violencia de gobiernos anteriores, pero se enfatiza la reducción de homicidios, secuestros y feminicidios mediante \"fuerzas de tarea\" y mesas de paz. Incluye la defensa de la investigación del caso Ayotzinapa (validando al GIEI y CNDH, revelando monitoreo militar) y el compromiso de \"Cero Impunidad\" en los asesinatos de periodistas."
+          },
+          {
+            narrativa: "2. Batalla Cultural y Medios (Nosotros vs. Conservadores)",
+            porcentaje: "~20%",
+            resumen: "El gobierno es el pueblo; la prensa crítica es la \"mafia del poder\" o \"propaganda negra\". Se ataca constantemente a medios como Reforma, El Universal y El Financiero por cuestionar las obras o las estadísticas. Se contraponen las \"encuestas de honestidad y cercanía\" (el pueblo elige por convicción) contra las campañas mediáticas tradicionales. Se busca deslegitimar la crítica periodística tildándola de conservadora o interesada."
+          },
+          {
+            narrativa: "3. Austeridad, Anticorrupción y Soberanía Económica",
+            porcentaje: "~15%",
+            resumen: "El fin del saqueo y la corrupción institucional. Se exalta el trabajo del SAT y la UIF contra \"factureras\" y evasión fiscal de grandes corporativos. Se defiende la eficiencia en la obra pública (ej. Auditoría a Santa Lucía con solo 0.01% de observaciones) para desmentir a la prensa que habla de \"empresas fantasma\". Se promueve la soberanía energética (Pemex) y la regulación de monopolios (ej. Minsa)."
+          },
+          {
+            narrativa: "4. Identidad Nacional, Historia e Infraestructura",
+            porcentaje: "~15%",
+            resumen: "Las megaobras no son solo cemento, son rescate histórico y orgullo nacional. El Tren Maya se narra como la mayor obra de salvamento arqueológico (uso de LIDAR, 45 terabytes de datos, INAH). Se busca vincular el desarrollo económico con la revalorización de las culturas originarias (mundo maya), presentando al gobierno como el verdadero custodio del patrimonio histórico frente al olvido de los neoliberales."
+          },
+          {
+            narrativa: "5. Bienestar, Salud y Perspectiva de Género",
+            porcentaje: "~10%",
+            resumen: "El Estado como garante y protector de los vulnerables. Se destaca la entrega directa de apoyos a damnificados (sin intermediarios corruptos), el abasto de medicamentos (sistema de recetas surtidas) y la atención a la salud. En género, se resalta el Protocolo Violeta (búsqueda de mujeres), la erradicación del matrimonio forzado y las \"unidades de contexto\" para entender y castigar los feminicidios."
+          },
+          {
+            narrativa: "6. Gobernanza, Democracia y Austeridad Republicana",
+            porcentaje: "~10%",
+            resumen: "Instituciones al servicio del pueblo, no de las élites. Se debate sobre el presupuesto del INE exigiendo austeridad. Se promueve un gobierno de \"puertas abiertas\" donde los funcionarios rinden cuentas diariamente. Se enfatiza que los servidores públicos deben tener como prioridad el salario y el bienestar del pueblo, cerrando el paso a la burocracia dispendiosa."
+          }
+        ]
+      },
+      2023: {
+        type: 'summary',
+        headers: [
+          { name: "Narrativa Identificada", width: "25%" },
+          { name: "Porcentaje", width: "15%" },
+          { name: "Resumen de la Narrativa", width: "60%" }
+        ],
+        rows: [
+          {
+            narrativa: "1. Medios y Desinformación (\"Quién es quién en las mentiras\")",
+            porcentaje: "~24%",
+            resumen: "Crítica sistemática a medios de comunicación y oposición por difundir \"narrativas falsas\". Se desmienten supuestas crisis económicas, reducciones de presupuesto en salud o fracasos en obras públicas, calificándolas como campañas de desprestigio."
+          },
+          {
+            narrativa: "2. Seguridad y Combate al Crimen",
+            porcentaje: "~21%",
+            resumen: "Reporte de resultados de las fuerzas de seguridad. Se enfatiza la tendencia a la baja en delitos de alto impacto y los decomisos récord de drogas, armas y dinero, atribuyéndolo a la coordinación entre gobiernos federal y estatal."
+          },
+          {
+            narrativa: "3. Salud y Abasto de Medicamentos",
+            porcentaje: "~21%",
+            resumen: "Enfoque en la transformación del sistema de salud: combate a la corrupción en compras, implementación del IMSS-Bienestar y el aumento significativo en el surtimiento de recetas médicas en hospitales y centros de salud."
+          },
+          {
+            narrativa: "4. Arqueología y Tren Maya",
+            porcentaje: "~13%",
+            resumen: "Detalle exhaustivo del salvamento arqueológico a lo largo de los tramos del Tren Maya. Se reportan decenas de miles de estructuras, fragmentos de cerámica, entierros humanos y avances en la construcción de nuevos museos de sitio."
+          },
+          {
+            narrativa: "5. Programas Sociales y Reconstrucción",
+            porcentaje: "~10%",
+            resumen: "Difusión de los programas de bienestar (pensiones, becas, apoyo a adultos mayores) y avances en la reconstrucción de viviendas e infraestructura pública post-desastres, destacando la entrega directa sin intermediarios."
+          },
+          {
+            narrativa: "6. Petróleo y Combustible",
+            porcentaje: "~6%",
+            resumen: "Combate al robo de hidrocarburos (huachicoleo), destrucción de tomas clandestinas y esfuerzos para recuperar la producción petrolera nacional frente a la declinación de campos maduros como Cantarell."
+          },
+          {
+            narrativa: "7. Personas Desaparecidas",
+            porcentaje: "~5%",
+            resumen: "Explicación de la metodología de búsqueda, cruces masivos de bases de datos y jornadas de búsqueda casa por casa para localizar a personas reportadas como desaparecidas."
+          }
+        ]
+      },
+2024: {
+        type: 'simple',
+        headers: [
+          { name: "Narrativa Identificada", width: "25%" },
+          { name: "Porcentaje", width: "15%" },
+          { name: "Resumen de la Narrativa", width: "60%" }
+        ],
+        rows: [
+          {
+            narrativa: "1. Salud y Bienestar Social",
+            porcentaje: "~25.1%",
+            explicacion: "Narrativa más frecuente. Se centra en la rendición de cuentas de los programas sociales: entrega de pensiones a adultos mayores y personas con discapacidad, creación de millones de historiales médicos digitales, el programa \"Salud Casa por Casa\", la distribución de becas (más de 12 millones) y la mejora de la infraestructura médica y salarial para enfermeras y médicos. Se enfatiza el enfoque preventivo y la eliminación de la intermediación corrupta."
+          },
+          {
+            narrativa: "2. Relaciones Internacionales y Migración",
+            porcentaje: "~16.7%",
+            explicacion: "Tema de alta relevancia en 2024. Aborda la relación con Estados Unidos y Canadá (T-MEC, cooperación en seguridad y migración), la atención a las causas de la migración mediante programas como \"Sembrando Vida\" en Centroamérica (Guatemala, Honduras, El Salvador), y la celebración de triunfos progresistas en América Latina (ej. Uruguay). También incluye la defensa de la soberanía frente a arbitrajes internacionales de empresas extranjeras."
+          },
+          {
+            narrativa: "3. Reforma Judicial y Poder Judicial",
+            porcentaje: "~16.1%",
+            explicacion: "Refleja el debate central de la recta final del sexenio. Se explica y defiende la reforma constitucional al Poder Judicial, la elección popular de jueces, magistrados y ministros, la creación del Tribunal de Disciplina, y la modificación de la Ley Orgánica. Se contrapone la \"impunidad\" y los \"privilegios\" de la vieja estructura judicial con la transparencia y la rendición de cuentas que traerá la nueva carrera judicial."
+          },
+          {
+            narrativa: "4. Medios, Desinformación y Crítica Política",
+            porcentaje: "~14.2%",
+            explicacion: "El texto dedica un espacio sustancial a denunciar campañas de desprestigio. Se mencionan ataques mediante \"granjas\" de cuentas en redes sociales, manipulación con inteligencia artificial (videos falsos), la parcialidad de ciertos medios tradicionales y periodistas, y las críticas de \"calificadoras\" extranjeras (Fitch, Ratings). Se acusa a la oposición y a grupos conservadores de buscar un \"fraude\" o desestabilizar al gobierno."
+          },
+          {
+            narrativa: "5. Infraestructura y Proyectos Estratégicos",
+            porcentaje: "~11.6%",
+            explicacion: "Se reporta el avance y la consolidación de obras emblemáticas: el Tren Maya (estaciones, libramientos, cocheras), el desarrollo de proyectos ferroviarios (México-Pachuca, Querétaro-Irapuato), la Refinería Olmeca, y los programas de vivienda y regularización de predios. Se destaca el papel de la CFE y PEMEX en el fortalecimiento de la infraestructura energética y logística del país."
+          },
+          {
+            narrativa: "6. Seguridad y Delincuencia",
+            porcentaje: "~11.0%",
+            explicacion: "Se presentan cifras de incidencia delictiva destacando las \"tendencias a la baja\" en homicidios dolosos, feminicidios, secuestros y robos. Se defiende la estrategia de \"abrazos, no balazos\" combinada con la presencia de la Guardia Nacional, SEDENA y Marina, y se resalta la eliminación de la \"cifra negra\" en las estadísticas del INEGI. También se mencionan operativos contra el narcotráfico y la desarticulación de grupos criminales."
+          },
+          {
+            narrativa: "7. Economía, Austeridad y Combate a la Corrupción",
+            porcentaje: "~5.3%",
+            explicacion: "Aunque con menor peso relativo en este archivo específico, se mantiene la narrativa de la \"austeridad republicana\", el combate al \"saqueo\" neoliberal, la estabilidad del salario mínimo, el control de la inflación y la defensa de las finanzas públicas sin endeudamiento excesivo, contrastando con la \"decadencia\" y los \"privilegios\" de los gobiernos anteriores."
+          }
+        ]
+      },
+      2025: {
+        type: 'simple',
+        headers: [
+          { name: "Narrativa Identificada", width: "25%" },
+          { name: "Porcentaje", width: "15%" },
+          { name: "Resumen de la Narrativa", width: "60%" }
+        ],
+        rows: [
+          {
+            narrativa: "1. Salud Pública y Bienestar Social",
+            porcentaje: "~35.0%",
+            explicacion: "Narrativa dominante. Se centra en la construcción de un sistema de salud preventivo y digitalizado. Se destaca la creación de \"14 millones de historiales médicos\" para adultos mayores y personas con discapacidad, el programa \"Resultados Vida Saludable\" con evaluación del estado nutricional escolar, y el fortalecimiento del IMSS. Se enfatiza el monitoreo semanal con la Secretaría de Salud y el rol central del personal de enfermería."
+          },
+          {
+            narrativa: "2. Seguridad, Delincuencia y Justicia",
+            porcentaje: "~19.1%",
+            explicacion: "Segunda narrativa más fuerte. Se presentan \"cifras consolidadas\" de incidencia delictiva con énfasis en las reducciones porcentuales interanuales (ej. feminicidio -28.7%, secuestro -69%, robos con violencia -46%). Se defiende la confiabilidad de los datos del INEGI (sin \"cifra negra\" en homicidios y robo de vehículos) y se resalta la coordinación transversal entre fiscalías estatales, la FGR, la Guardia Nacional, la SEDENA y la Marina."
+          },
+          {
+            narrativa: "3. Infraestructura y Proyectos Estratégicos",
+            porcentaje: "~17.9%",
+            explicacion: "Enfocada en el avance de obras físicas y estudios de preinversión. Se mencionan específicamente el Tren Maya, los corredores ferroviarios (México-Pachuca, Querétaro-Irapuato, Saltillo-Nuevo Laredo), la demanda de viajes anuales, y proyectos de vivienda (licitaciones de predios, limpieza, mecánica de suelos y desarrollo de proyectos ejecutivos)."
+          },
+          {
+            narrativa: "4. Energía y Soberanía Energética",
+            porcentaje: "~11.8%",
+            explicacion: "Aborda la autosuficiencia y estabilidad del sistema eléctrico. Se detallan los planes de PEMEX para perforar \"269 pozos exploratorios\" en seis proyectos estratégicos (Veracruz, Oaxaca, Tabasco, Chiapas, Campeche), la renovación de yacimientos, y el monitoreo del \"margen de reserva operativa\" y la \"reserva fría\" para garantizar el suministro eléctrico ante la demanda."
+          },
+          {
+            narrativa: "5. Medios, Desinformación y Redes Sociales",
+            porcentaje: "~9.2%",
+            explicacion: "El texto dedica un espacio significativo a denunciar la \"manipulación del debate en redes sociales\". Se habla de \"granjas\" de cuentas, compra de hashtags, y la automatización de mensajes para desprestigiar al gobierno. También se menciona la crítica a las \"calificadoras estadounidenses\" (Fitch, Ratings) y a ciertos medios tradicionales por generar narrativas de fracaso."
+          },
+          {
+            narrativa: "6. Combate al Narcotráfico",
+            porcentaje: "~5.7%",
+            explicacion: "Se aborda desde una perspectiva de cooperación internacional y resultados operativos. Se mencionan las \"incautaciones\" en kilogramos, el desmantelamiento de laboratorios, la atención al problema del fentanilo y la coordinación con la CBP (Aduanas y Protección Fronteriza de EE. UU.) para interceptar el flujo de drogas en la frontera."
+          },
+          {
+            narrativa: "7. Personas Desaparecidas y Búsqueda",
+            porcentaje: "~1.3%",
+            explicacion: "Aunque el porcentaje cuantitativo es menor, es un tema de alta sensibilidad política. La narrativa se centra en la depuración y fortalecimiento de las \"bases de datos\" de las fiscalías, la revisión de carpetas de investigación incompletas, la localización de personas que regresaron a casa sin avisar, y el apoyo a las comisiones de búsqueda y colectivos de familiares."
+          }
+        ]
+      },
+      2026: {
+        type: 'simple',
+        headers: [
+          { name: "Narrativa Identificada", width: "25%" },
+          { name: "Porcentaje", width: "15%" },
+          { name: "Resumen de la Narrativa", width: "60%" }
+        ],
+        rows: [
+          {
+            narrativa: "Política Exterior, Soberanía y Rechazo al Intervencionismo",
+            porcentaje: "~35%",
+            explicacion: "• Rechazo firme a intervenciones militares o extracción de mandatarios por fuerzas extranjeras.<br>• Apelación al Art. 89, Fracc. X (autodeterminación, no intervención, solución pacífica).<br>• Relación con EE. UU. basada en 4 principios: soberanía, responsabilidad compartida, confianza y cooperación sin subordinación.<br>• Exigencia de frenar el tráfico ilegal de armas de EE. UU. a México y atender el consumo interno en ese país."
+          },
+          {
+            narrativa: "Programas Sociales, Bienestar y Política de Estado",
+            porcentaje: "~30%",
+            explicacion: "• Presentación del presupuesto histórico para programas de bienestar constitucionalizados.<br>• Cobertura masiva mediante pensiones a adultos mayores, mujeres, personas con discapacidad y becas (Rita Cetina, Benito Juárez).<br>• Impulso a la política salarial (+13% al salario mínimo) y programas como \"La Escuela es Nuestra\" y \"Jóvenes Construyendo el Futuro\"."
+          },
+          {
+            narrativa: "Indicadores de Seguridad y Estrategia de Paz",
+            porcentaje: "~20%",
+            explicacion: "• Consolidación del modelo de seguridad basado en la atención a las causas e inteligencia vinculada a fiscalías.<br>• Reporte de la reducción en indicadores de homicidio doloso y delitos patrimoniales de alto impacto.<br>• Defensa pública de la estrategia de construcción de paz frente a discursos mediáticos u opositores."
+          },
+          {
+            narrativa: "Reactivación del Sector Turístico e Infraestructura",
+            porcentaje: "~15%",
+            explicacion: "• Muestra de indicadores positivos en flujo de visitantes extranjeros y nacionales.<br>• Crecimiento en la aportación al PIB turístico, empleos formales asegurados y apertura de nuevas rutas aéreas.<br>• Recuperación de ocupación y derrama económica en destinos estratégicos (Acapulco, Mazatlán) y proyección dentro del Plan México."
+          }
+        ]
+      }
+    };
+
+function selectYear(year, element) {
+      document.querySelectorAll('.node-wrapper').forEach(n => n.classList.remove('active'));
+      element.classList.add('active');
+
+      const card = document.getElementById('card-display');
+      card.classList.add('fade-out');
+
+      setTimeout(() => {
+        const yearObj = data[year];
+        
+        if (!yearObj) {
+          card.innerHTML = `
+            <h2 class="card-title">Mañaneras — Año ${year}</h2>
+            <p style="color: var(--text-muted);">Pendiente por agregar los datos de este año.</p>
+          `;
+        } else {
+          let headersHtml = yearObj.headers.map(h => `<th style="width: ${h.width};">${h.name}</th>`).join('');
+          let rowsHtml = '';
+
+          if (yearObj.type === 'detailed') {
+            rowsHtml = yearObj.rows.map(item => `
+              <tr>
+                <td class="narrative-title">${item.narrativa}</td>
+                <td><span class="percentage-badge">${item.porcentaje}</span></td>
+                <td>
+                  <ul>
+                    ${item.mensajes.map(m => `<li>${m}</li>`).join('')}
+                  </ul>
+                </td>
+                <td>
+                  <ul>
+                    ${item.estrategia.map(e => `<li>${e}</li>`).join('')}
+                  </ul>
+                </td>
+              </tr>
+            `).join('');
+          } else if (yearObj.type === 'simple') {
+            rowsHtml = yearObj.rows.map(item => `
+              <tr>
+                <td class="narrative-title">${item.narrativa}</td>
+                <td><span class="percentage-badge">${item.porcentaje}</span></td>
+                <td>${item.explicacion}</td>
+              </tr>
+            `).join('');
+          } else if (yearObj.type === 'deep') {
+            rowsHtml = yearObj.rows.map(item => `
+              <tr>
+                <td class="narrative-title">${item.narrativa}</td>
+                <td><span class="percentage-badge">${item.porcentaje}</span></td>
+                <td>${item.resumen}</td>
+                <td><em>${item.elementos}</em></td>
+              </tr>
+            `).join('');
+          /* AQUÍ ESTÁ EL BLOQUE QUE TE FALTABA PARA 2022 */
+          } else if (yearObj.type === 'summary') {
+            rowsHtml = yearObj.rows.map(item => `
+              <tr>
+                <td class="narrative-title">${item.narrativa}</td>
+                <td><span class="percentage-badge">${item.porcentaje}</span></td>
+                <td>${item.resumen}</td>
+              </tr>
+            `).join('');
+          }
+
+          card.innerHTML = `
+            <h2 class="card-title">Análisis de Narrativas — ${year}</h2>
+            <div class="table-responsive">
+              <table class="narrative-table">
+                <thead>
+                  <tr>${headersHtml}</tr>
+                </thead>
+                <tbody>
+                  ${rowsHtml}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+        card.classList.remove('fade-out');
+      }, 150);
+    }
+
+    // Cargar 2019 al inicio
+    selectYear(2019, document.querySelector('.node-wrapper'));
+  </script>
+</body>
+</html>
